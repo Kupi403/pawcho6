@@ -1,10 +1,18 @@
+# syntax=docker/dockerfile:1
+
 # build
 FROM alpine:3.19 AS builder
 
 ARG VERSION=1.0
 ENV APP_VERSION=$VERSION
 
+RUN apk add --no-cache git openssh-client
+RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 WORKDIR /app
+
+RUN --mount=type=ssh git clone git@github.com:Kupi403/pawcho6.git .
+
 COPY index.sh .
 RUN chmod +x index.sh  # nadajemy prawa już tutaj
 
@@ -18,6 +26,10 @@ FROM nginx:alpine
 
 ARG VERSION
 ENV APP_VERSION=$VERSION
+
+LABEL org.opencontainers.image.source="https://github.com/Kupi403/pawcho6"
+LABEL org.opencontainers.image.description="Lab6 - SSH mount i ghcr.io"
+LABEL org.opencontainers.image.authors="Michał Kupidura"
 
 RUN apk add --no-cache curl bash
 
